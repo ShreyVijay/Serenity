@@ -5,6 +5,7 @@ import { getSessionId } from "./utils/session.js";
 import Landing from "./pages/Landing";
 import Journal from "./pages/Journal";
 import Calendar from "./pages/Calendar";
+import Checkin from "./pages/Checkin";
 
 function App() {
   const [sessionId, setSessionId] = useState(null);
@@ -24,6 +25,7 @@ function App() {
         <Route path="/" element={<Landing />} />
         <Route path="/journal" element={<Journal sessionId={sessionId} />} />
         <Route path="/calendar" element={<Calendar sessionId={sessionId} />} />
+        <Route path="/checkin" element={<Checkin sessionId={sessionId} />} />
       </Routes>
     </BrowserRouter>
   );

@@ -1,4 +1,4 @@
-const BASE_URL = "http://localhost:5000";
+// const BASE_URL = "http://localhost:5000";
 
 export async function saveJournalAPI(sessionId, entry) {
   const res = await fetch(`${BASE_URL}/journal`, {
@@ -13,7 +13,7 @@ export async function saveJournalAPI(sessionId, entry) {
 }
 
 export async function getJournalsAPI(sessionId) {
-  const res = await fetch(`${BASE_URL}/journal?sessionId=${sessionId}`);
+  const res = await fetch(`${import.meta.env.VITE_API_BASE}/journal?sessionId=${sessionId}`);
 
   if (!res.ok) {
     throw new Error("Failed to fetch journals");

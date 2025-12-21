@@ -5,30 +5,43 @@ const journalSchema = new mongoose.Schema(
     sessionId: {
       type: String,
       required: true,
-      index: true
+      index: true,
     },
     date: {
       type: String,
-      required: true
+      required: true,
     },
     text: {
       type: String,
-      required: true
-    },
-    mood: {
-      type: Number,
       required: true,
-      min: 1,
-      max: 5
+    },
+    emotion: {
+      type: String,
+      required: true,
     },
     culture: {
-      type: String,
-      enum: ["neutral", "indian", "western"],
-      default: "neutral"
+      type: String,enum: [
+    "neutral",
+    "indian",
+    "western",
+    "east-asian",
+    "middle-eastern",
+    "latin",
+    "african"
+  ],
+      default: "neutral",
     },
     reflection: {
-      type: String
-    }
+      type: String,
+    },
+    followUp: {
+      type: String,
+      default: null,
+    },
+    time: {
+      type: String,
+      required: true,
+    },
   },
   { timestamps: true }
 );
