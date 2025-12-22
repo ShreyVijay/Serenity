@@ -20,7 +20,7 @@ function Landing() {
   const t = useText();
   const [showSettings, setShowSettings] = useState(false);
 
-  // State for settings (loaded from local storage)
+  // State for settings
   const [language, setLanguage] = useState("en");
   const [culture, setCulture] = useState("neutral");
 
@@ -52,9 +52,10 @@ function Landing() {
   };
 
   return (
-    <div className="min-h-screen relative overflow-x-hidden bg-gradient-to-b from-sky-100 via-emerald-50 to-slate-100 font-sans text-slate-800 antialiased selection:bg-emerald-100 selection:text-emerald-900 flex flex-col">
+    // UPDATED: h-screen + overflow-y-auto prevents double scrollbars
+    <div className="h-screen w-full overflow-y-auto overflow-x-hidden bg-gradient-to-b from-sky-100 via-emerald-50 to-slate-100 font-sans text-slate-800 antialiased selection:bg-emerald-100 selection:text-emerald-900 flex flex-col relative">
       
-      {/* Ambient Background - Responsive sizes */}
+      {/* Ambient Background */}
       <div className="absolute top-[-20%] left-[-10%] w-[80%] md:w-[60%] h-[60%] bg-white/40 rounded-full blur-[80px] md:blur-[120px] pointer-events-none" />
       <div className="absolute bottom-[-10%] right-[-10%] w-[70%] md:w-[50%] h-[50%] bg-sky-200/20 rounded-full blur-[80px] md:blur-[100px] pointer-events-none" />
 
@@ -98,10 +99,10 @@ function Landing() {
             </p>
         </motion.div>
 
-        {/* Action Grid - Responsive Layout */}
+        {/* Action Grid */}
         <div className="grid grid-cols-1 md:grid-cols-12 gap-4 md:gap-6 mb-12">
             
-            {/* Primary Card: Journal (Span 7/12 on Desktop, Full on Mobile) */}
+            {/* Primary Card: Journal */}
             <motion.div variants={cardVariants} className="md:col-span-7 h-full">
                 <Link to="/journal" className="group block h-full">
                     <div className="relative h-full bg-white/70 backdrop-blur-xl border border-white/60 rounded-[2rem] md:rounded-[2.5rem] p-6 md:p-8 transition-all duration-300 hover:shadow-[0_20px_40px_-12px_rgba(0,0,0,0.06)] hover:bg-white/90 overflow-hidden">
@@ -125,7 +126,7 @@ function Landing() {
                 </Link>
             </motion.div>
 
-            {/* Secondary Column (Span 5/12 on Desktop) */}
+            {/* Secondary Column */}
             <div className="md:col-span-5 flex flex-col gap-4 md:gap-6">
                 
                 {/* Check-in Card */}
@@ -167,16 +168,15 @@ function Landing() {
         </div>
 
         {/* Footer */}
-        <motion.p variants={cardVariants} className="mt-auto pt-4 text-center text-xs text-slate-400 font-medium tracking-wide">
+        <motion.p variants={cardVariants} className="mt-auto pt-4 text-center text-xs text-slate-400 font-medium tracking-wide pb-8">
             Your space. Your pace.
         </motion.p>
       </motion.div>
 
-      {/* Settings Modal - Centered and Responsive */}
+      {/* Settings Modal */}
       <AnimatePresence>
         {showSettings && (
           <>
-            {/* Backdrop */}
             <motion.div 
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
@@ -184,12 +184,12 @@ function Landing() {
                 onClick={() => setShowSettings(false)}
                 className="fixed inset-0 bg-slate-900/20 backdrop-blur-sm z-40"
             />
-            {/* Modal */}
+            {/* UPDATED: Added overflow-y-auto and max-h constraint to the modal content */}
             <motion.div 
                 initial={{ opacity: 0, scale: 0.95, y: 20 }}
                 animate={{ opacity: 1, scale: 1, y: 0 }}
                 exit={{ opacity: 0, scale: 0.95, y: 20 }}
-                className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[90%] max-w-sm bg-white/90 backdrop-blur-2xl rounded-[2rem] shadow-2xl z-50 p-8 border border-white/60"
+                className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[90%] max-w-sm max-h-[85vh] overflow-y-auto bg-white/90 backdrop-blur-2xl rounded-[2rem] shadow-2xl z-50 p-8 border border-white/60 custom-scrollbar"
             >
                 <div className="flex items-center justify-between mb-8">
                     <div>
@@ -238,6 +238,9 @@ function Landing() {
           </>
         )}
       </AnimatePresence>
+      <style>{`
+        .custom-scrollbar::-webkit-scrollbar { width: 0px; background: transparent; }
+      `}</style>
     </div>
   );
 }
