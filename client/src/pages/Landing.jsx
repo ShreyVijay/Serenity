@@ -80,11 +80,14 @@ function Landing() {
         {/* LOGO SPACE & HEADER */}
         <motion.div variants={cardVariants} className="flex flex-col items-center text-center mb-10 md:mb-12">
             
-            {/* LOGO PLACEHOLDER (Preserved) */}
-            <div className="w-24 h-24 md:w-28 md:h-28 mb-6 rounded-full border-2 border-dashed border-slate-300/50 flex items-center justify-center bg-white/20 backdrop-blur-sm">
-                 <span className="text-[10px] font-bold tracking-widest text-slate-400 uppercase opacity-60">
-                   Logo Space
-                 </span>
+            {/* LOGO */}
+            {/* Note: Ensure 'logo.png' is inside your 'client/public' folder */}
+            <div className="w-32 h-32 md:w-28 md:h-28 mb-6 rounded-full flex items-center justify-centerbackdrop-blur-sm overflow-hidden p-1">
+                 <img 
+                    src="/logo.png" 
+                    alt="Serenity" 
+                    className="w-full h-full object-contain rounded-full opacity-90 hover:scale-105 transition-transform duration-500" 
+                 />
             </div>
 
             <h1 className="text-4xl md:text-5xl font-light text-slate-800 mb-3 tracking-tight">
