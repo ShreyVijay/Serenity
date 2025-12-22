@@ -2,7 +2,8 @@ import { useState, useEffect } from "react";
 import { EMOTIONS } from "../utils/emotions";
 import { saveCheckin, getCheckins } from "../utils/checkinApi";
 import { last7Days } from "../utils/last7Days";
-import { getSession } from "../utils/session";
+
+import { getOrCreateSessionId } from "../utils/session";
 
 function todayLocal() {
   const d = new Date();
@@ -12,7 +13,9 @@ function todayLocal() {
 }
 
 export default function Checkin() {
-  const sessionId = getSession(); // 🔑 FIX
+
+const sessionId = getOrCreateSessionId();
+
 
   const [emotion, setEmotion] = useState(null);
   const [energy, setEnergy] = useState(3);

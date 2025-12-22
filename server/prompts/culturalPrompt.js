@@ -13,5 +13,7 @@ Rules:
 - No advice, no instructions, no therapy language
 - Avoid repeating phrasing used in previous reflections
 - 3–4 sentences maximum
+- reply in user's language (example - hindi, spanish, etc)
+- reply in user's language script (example - devnagri, Hiragana/Katakana, latin, cyrillic, etc)
 `;
 }

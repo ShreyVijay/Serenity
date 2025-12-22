@@ -1,11 +1,12 @@
 import { useState } from "react";
 import MoodSelector from "../components/MoodSelector";
 import { useNavigate } from "react-router-dom";
-import { getSession } from "../utils/session";
+import { getOrCreateSessionId, getCulture } from "../utils/session";
+
 import { useText } from "../i18n/useText";
 
 function Journal() {
-  const sessionId = getSession();
+  const sessionId = getOrCreateSessionId();
   const navigate = useNavigate();
   const t = useText();
 
@@ -41,7 +42,7 @@ function Journal() {
       time,
       text,
       emotion,
-      culture: "neutral", // culture will be moved later to Welcome
+      culture: getCulture(),
     };
 
     try {

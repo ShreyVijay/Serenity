@@ -7,10 +7,12 @@ import { EMOTIONS } from "../utils/emotions";
 import { weeklyEmotionalDrift } from "../utils/weeklyDrift";
 import { dailyEmotionalDrift } from "../utils/dailyDrift";
 
-import { getSession } from "../utils/session";
+import { getOrCreateSessionId } from "../utils/session";
 
 function Calendar() {
-  const sessionId = getSession();
+
+const sessionId = getOrCreateSessionId();
+
 
   const [events, setEvents] = useState([]);
   const [selectedDate, setSelectedDate] = useState(null);
