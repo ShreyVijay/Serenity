@@ -1,9 +1,20 @@
 import { TEXT } from "./text";
-import { useSession } from "../context/SessionContext";
+import { getLanguage } from "../utils/session";
+import { useSyncExternalStore } from "react";
+
+/**
+ * React-safe subscription to language changes
+ */
+function subscribe(callback) {
+  window.addEventListener("storage", callback);
+  return () => window.removeEventListener("storage", callback);
+}
+
+function getSnapshot() {
+  return getLanguage();
+}
 
 export function useText() {
-  const { session } = useSession();
-  const lang = session?.language || "en";
-
+  const lang = useSyncExternalStore(subscribe, getSnapshot);
   return TEXT[lang] || TEXT.en;
 }
