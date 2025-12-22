@@ -8,10 +8,9 @@ import { resolveHelpline } from "../utils/resolveHelpline.js";
 export async function createJournal(req, res) {
   console.log("POST /journal HIT");
   console.log("Request body:", req.body);
-console.log("DANGER CHECK INPUT:", entry.text);
-console.log("DANGER CHECK RESULT:", hasDangerContent(entry.text));
 
   try {
+    // ✅ FIX: destructure FIRST
     const { sessionId, entry } = req.body;
 
     if (!sessionId || !entry || !entry.text || !entry.emotion) {
@@ -19,14 +18,17 @@ console.log("DANGER CHECK RESULT:", hasDangerContent(entry.text));
       return res.status(400).json({ error: "Invalid request payload" });
     }
 
-    // 1️⃣ Always create journal FIRST
+    console.log("DANGER CHECK INPUT:", entry.text);
+    console.log("DANGER CHECK RESULT:", hasDangerContent(entry.text));
+
+    // 1️⃣ Always create journal first
     const journal = await Journal.create({
       sessionId,
       ...entry,
-      reflection: "", // placeholder
+      reflection: "",
     });
 
-    // 2️⃣ Crisis handling (no AI)
+    // 2️⃣ Crisis path
     if (hasDangerContent(entry.text)) {
       console.warn("Crisis content detected");
 
@@ -37,11 +39,10 @@ console.log("DANGER CHECK RESULT:", hasDangerContent(entry.text));
       await journal.save();
 
       const location = getUserLocation(req);
-console.log("crisis");
-console.log("LOCATION:", location);
+      console.log("LOCATION:", location);
 
       const helpline = await resolveHelpline({
-        country: location.country,
+        country: location?.country,
         culture: entry.culture,
       });
 
@@ -49,11 +50,11 @@ console.log("LOCATION:", location);
         journalId: journal._id,
         reflection: crisisMessage,
         crisis: true,
-        helpline
+        helpline,
       });
     }
 
-    // 3️⃣ AI reflection (best-effort)
+    // 3️⃣ Normal AI reflection
     let reflection = "";
 
     try {
@@ -61,19 +62,18 @@ console.log("LOCATION:", location);
         reflection =
           "Thank you for sharing this. Taking time to reflect is already a meaningful step.";
       } else {
-        console.log("Calling Gemini…");
+        console.log("Calling LLM…");
         reflection = await generateReflection(entry.text, entry.culture);
       }
     } catch (aiErr) {
       console.error("AI failed, using fallback:", aiErr.message);
       reflection =
-        "Thank you for sharing this. Your feelings are valid, and reflecting on them is a meaningful step.";
+        "Thank you for sharing this. Your feelings are valid, and reflecting on them matters.";
     }
 
     journal.reflection = reflection;
     await journal.save();
 
-    // 4️⃣ Final response (REQUIRED FIELDS)
     return res.json({
       journalId: journal._id,
       reflection,
@@ -96,11 +96,14 @@ export async function getJournals(req, res) {
     const { sessionId } = req.query;
 
     if (!sessionId) {
-      console.error("Missing sessionId");
       return res.status(400).json({ error: "Missing sessionId" });
     }
 
-    const journals = await Journal.find({ sessionId }).sort({ date: 1 });
+    const journals = await Journal.find({ sessionId }).sort({
+      date: 1,
+      time: 1,
+    });
+
     return res.json(journals);
   } catch (err) {
     console.error("❌ FETCH JOURNALS FAILED");
@@ -123,20 +126,19 @@ export async function addFollowUp(req, res) {
       return res.status(404).json({ error: "Journal not found" });
     }
 
-    // Best-effort AI follow-up
     let followUp = "";
 
     try {
       if (ENV.DISABLE_AI === "true") {
         followUp =
-          "It can help to sit with this thought for a moment and notice what comes up.";
+          "You might notice how this thought feels as you sit with it for a moment.";
       } else {
-        followUp = await generateReflection(text, "neutral");
+        followUp = await generateReflection(text, journal.culture || "neutral");
       }
     } catch (aiErr) {
-      console.error("FOLLOW UP AI FAILED — USING FALLBACK", aiErr.message);
+      console.error("FOLLOW UP AI FAILED", aiErr.message);
       followUp =
-        "It might be worth giving yourself a quiet moment to reflect on this further.";
+        "Giving yourself a quiet moment to reflect on this could be helpful.";
     }
 
     journal.followUp = followUp;

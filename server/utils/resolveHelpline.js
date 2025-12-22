@@ -1,23 +1,20 @@
 export async function resolveHelpline({ country, culture }) {
+  // DEV fallback so it works locally
+  if (!country && process.env.NODE_ENV !== "production") {
+    country = "IN";
+  }
+
   if (!country) return null;
 
   try {
     const res = await fetch(
       `https://findahelpline.com/${country.toLowerCase()}`,
-      {
-        headers: {
-          "User-Agent": "Serenity-App",
-        },
-      }
+      { headers: { "User-Agent": "Serenity-App" } }
     );
 
     if (!res.ok) return null;
 
     const html = await res.text();
-
-    // Minimal parsing strategy:
-    // We DO NOT scrape aggressively.
-    // We only extract the primary helpline block.
 
     const phoneMatch = html.match(/tel:\+?[\d\s\-()]+/);
     const nameMatch = html.match(/<h2[^>]*>(.*?)<\/h2>/);
@@ -25,11 +22,13 @@ export async function resolveHelpline({ country, culture }) {
     if (!phoneMatch || !nameMatch) return null;
 
     return {
-      name: nameMatch[1].replace(/<[^>]+>/g, ""),
-      phone: phoneMatch[0].replace("tel:", ""),
-      country,
-      culture,
-    };
+  name: nameMatch[1].replace(/<[^>]+>/g, ""),
+  phone: phoneMatch[0].replace("tel:", ""),
+  website: `https://findahelpline.com/${country.toLowerCase()}`,
+  country,
+  culture,
+};
+
   } catch {
     return null;
   }

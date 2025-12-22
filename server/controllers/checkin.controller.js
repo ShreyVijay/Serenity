@@ -1,6 +1,8 @@
 import DailyCheckin from "../models/DailyCheckin.js";
 
 export async function upsertCheckin(req, res) {
+  console.log("CHECKIN BODY:", req.body);
+
   try {
     const { sessionId, checkin } = req.body;
     if (!sessionId || !checkin) {

@@ -1,10 +1,17 @@
-export function getSessionId() {
-  let sessionId = localStorage.getItem("serenity_session_id");
+import { v4 as uuid } from "uuid";
 
-  if (!sessionId) {
-    sessionId = crypto.randomUUID();
-    localStorage.setItem("serenity_session_id", sessionId);
-  }
+const KEY = "serenity_session";
 
-  return sessionId;
+export function createSession() {
+  const id = uuid();
+  localStorage.setItem(KEY, id);
+  return id;
+}
+
+export function getSession() {
+  return localStorage.getItem(KEY);
+}
+
+export function clearSession() {
+  localStorage.removeItem(KEY);
 }

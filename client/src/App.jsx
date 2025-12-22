@@ -1,33 +1,29 @@
-import { BrowserRouter, Routes, Route } from "react-router-dom";
-import { useEffect, useState } from "react";
-import { getSessionId } from "./utils/session.js";
+import { Routes, Route, Navigate } from "react-router-dom";
+import { useSession } from "./context/SessionContext";
 
+import Welcome from "./pages/Welcome";
 import Landing from "./pages/Landing";
 import Journal from "./pages/Journal";
 import Calendar from "./pages/Calendar";
 import Checkin from "./pages/Checkin";
 
 function App() {
-  const [sessionId, setSessionId] = useState(null);
-
-  useEffect(() => {
-    const id = getSessionId();
-    setSessionId(id);
-  }, []);
-
-  if (!sessionId) return null;
-  console.log("Session:", sessionId);
-
+  const { isInitialized } = useSession();
 
   return (
-    <BrowserRouter>
-      <Routes>
-        <Route path="/" element={<Landing />} />
-        <Route path="/journal" element={<Journal sessionId={sessionId} />} />
-        <Route path="/calendar" element={<Calendar sessionId={sessionId} />} />
-        <Route path="/checkin" element={<Checkin sessionId={sessionId} />} />
-      </Routes>
-    </BrowserRouter>
+    <Routes>
+      {!isInitialized && <Route path="*" element={<Welcome />} />}
+
+      {isInitialized && (
+        <>
+          <Route path="/" element={<Landing />} />
+          <Route path="/journal" element={<Journal />} />
+          <Route path="/calendar" element={<Calendar />} />
+          <Route path="/checkin" element={<Checkin />} />
+          <Route path="*" element={<Navigate to="/" />} />
+        </>
+      )}
+    </Routes>
   );
 }
 

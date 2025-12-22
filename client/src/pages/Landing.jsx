@@ -1,22 +1,35 @@
 import { useNavigate } from "react-router-dom";
+import { useSession } from "../context/SessionContext";
 
 function Landing() {
+  const { session, clearSession } = useSession();
   const navigate = useNavigate();
 
+  async function clearAll() {
+    try {
+      await fetch(
+        `http://localhost:5000/session/${session.sessionId}`,
+        { method: "DELETE" }
+      );
+    } catch (e) {
+      console.error("Backend delete failed, clearing locally anyway");
+    }
+
+    clearSession();
+    navigate("/welcome");
+  }
+
   return (
-    <div className="min-h-screen flex items-center justify-center">
-      <div className="text-center space-y-6 max-w-xl">
-        <h1 className="text-4xl font-semibold">Serenity</h1>
-        <p className="text-slate-600">
-          A quiet space to write, feel, and reflect.
-        </p>
-        <button
-          onClick={() => navigate("/journal")}
-          className="px-6 py-3 rounded bg-slate-900 text-white"
-        >
-          Start Journaling
-        </button>
-      </div>
+    <div>
+      <h1>Serenity</h1>
+
+      <button onClick={() => navigate("/journal")}>Journal</button>
+      <button onClick={() => navigate("/checkin")}>Daily Check-in</button>
+      <button onClick={() => navigate("/calendar")}>Calendar</button>
+
+      <hr />
+
+      <button onClick={clearAll}>Clear All Data</button>
     </div>
   );
 }

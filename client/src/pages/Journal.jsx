@@ -1,12 +1,12 @@
 import { useState } from "react";
 import MoodSelector from "../components/MoodSelector";
-import CultureSelector from "../components/CultureSelector";
 import { useNavigate } from "react-router-dom";
+import { useSession } from "../context/SessionContext";
+import { useText } from "../i18n/useText";
 
-function Journal({ sessionId }) {
+function Journal() {
   const [text, setText] = useState("");
   const [emotion, setEmotion] = useState(null);
-  const [culture, setCulture] = useState("neutral");
   const [reflection, setReflection] = useState("");
   const [loading, setLoading] = useState(false);
   const [crisis, setCrisis] = useState(false);
@@ -15,11 +15,13 @@ function Journal({ sessionId }) {
   const [journalId, setJournalId] = useState(null);
   const [helpline, setHelpline] = useState(null);
 
+  const { session } = useSession();
   const navigate = useNavigate();
+  const t = useText();
 
   const canReflect = text.trim().length >= 10 && emotion !== null;
 
-  const handleReflect = async () => {
+  async function handleReflect() {
     if (!canReflect || loading) return;
 
     setLoading(true);
@@ -31,54 +33,46 @@ function Journal({ sessionId }) {
     setHelpline(null);
 
     const now = new Date();
-
-    const date = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(
-      2,
-      "0"
-    )}-${String(now.getDate()).padStart(2, "0")}`;
-
-    const time = `${String(now.getHours()).padStart(2, "0")}:${String(
-      now.getMinutes()
-    ).padStart(2, "0")}`;
+    const date = now.toISOString().slice(0, 10);
+    const time = now.toTimeString().slice(0, 5);
 
     const entry = {
-      date,
-      time,
-      text,
-      emotion,
-      culture,
-    };
+  date,
+  time,
+  text,
+  emotion,
+  culture: session.culture,
+};
 
     try {
       const res = await fetch("http://localhost:5000/journal", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ sessionId, entry }),
+        body: JSON.stringify({
+  sessionId: session.sessionId,
+  entry,
+})
+
       });
 
       const data = await res.json();
 
-      console.log("CREATE JOURNAL RESPONSE:", data);
+      setReflection(data.reflection || "");
+      setCrisis(!!data.crisis);
+      setHelpline(data.helpline || null);
 
       if (data.journalId) {
         setJournalId(data.journalId);
       }
-
-      setReflection(data.reflection || "");
-      setCrisis(!!data.crisis);
-      setHelpline(data.helpline);
     } catch (err) {
       console.error("Reflect failed:", err);
     } finally {
       setLoading(false);
     }
-  };
+  }
 
   async function handleFollowUp() {
-    if (!journalId) {
-      console.error("Follow-up blocked: journalId missing");
-      return;
-    }
+    if (!journalId) return;
 
     try {
       const res = await fetch(
@@ -100,7 +94,7 @@ function Journal({ sessionId }) {
 
   return (
     <div className="max-w-2xl mx-auto p-6 space-y-6">
-      <h2 className="text-2xl font-semibold">Today's Reflection</h2>
+      <h2 className="text-2xl font-semibold">{t.journalTitle}</h2>
 
       <button
         onClick={() => navigate("/checkin")}
@@ -110,14 +104,13 @@ function Journal({ sessionId }) {
       </button>
 
       <textarea
-        className="w-full min-h-[160px] p-4 rounded border focus:outline-none"
+        className="w-full min-h-[160px] p-4 rounded border"
         placeholder="Write anything that's on your mind..."
         value={text}
         onChange={(e) => setText(e.target.value)}
       />
 
       <MoodSelector emotion={emotion} setEmotion={setEmotion} />
-      <CultureSelector culture={culture} setCulture={setCulture} />
 
       <button
         disabled={!canReflect || loading}
@@ -136,17 +129,12 @@ function Journal({ sessionId }) {
           <p>{reflection}</p>
 
           {crisis && helpline && (
-  <div className="mt-3 border-t pt-3 text-sm text-slate-600">
-    <p>
-      Support available in your area:
-    </p>
-    <p className="font-medium">
-      {helpline.name}
-    </p>
-    <p>📞 {helpline.phone}</p>
-  </div>
-)}
-
+            <div className="border-t pt-3 text-sm text-slate-600">
+              <p>Support available in your area:</p>
+              <p className="font-medium">{helpline.name}</p>
+              <p>📞 {helpline.phone}</p>
+            </div>
+          )}
         </div>
       )}
 

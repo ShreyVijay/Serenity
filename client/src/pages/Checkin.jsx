@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { EMOTIONS } from "../utils/emotions";
 import { saveCheckin, getCheckins } from "../utils/checkinApi";
 import { last7Days } from "../utils/last7Days";
+import { useSession } from "../context/SessionContext";
 
 function todayLocal() {
   const d = new Date();
@@ -11,7 +12,11 @@ function todayLocal() {
   )}-${String(d.getDate()).padStart(2, "0")}`;
 }
 
-export default function Checkin({ sessionId }) {
+
+export default function Checkin() {
+  const { sessionId } = useSession();
+  console.log("CHECKIN SESSION ID:", sessionId);
+
   const [emotion, setEmotion] = useState(null);
   const [energy, setEnergy] = useState(3);
   const [openness, setOpenness] = useState(3);
@@ -19,9 +24,11 @@ export default function Checkin({ sessionId }) {
   const [saved, setSaved] = useState(false);
   const [week, setWeek] = useState([]);
 
-  const canSave = emotion && !saving;
+  const canSave = Boolean(emotion) && !saving;
 
   async function loadWeek() {
+    if (!sessionId) return;
+
     const data = await getCheckins(sessionId);
 
     console.log(
@@ -35,8 +42,8 @@ export default function Checkin({ sessionId }) {
       byDate[c.date] = c;
     });
 
-    // const palette = buildMoodPalette(data);
-    // setWeek(palette);
+    const days = last7Days().map((d) => byDate[d] || null);
+    setWeek(days);
   }
 
   useEffect(() => {
@@ -59,12 +66,8 @@ export default function Checkin({ sessionId }) {
     setSaving(false);
     setSaved(true);
 
-    // 🔑 THIS WAS MISSING
-    await loadWeek();
+    await loadWeek(); // refresh UI
   }
-
-  const recent = week.filter(Boolean);
-  // const driftText = emotionDrift(recent);
 
   return (
     <div className="max-w-2xl mx-auto p-6 space-y-6">
@@ -73,7 +76,9 @@ export default function Checkin({ sessionId }) {
       <div>
         <p>This week:</p>
         {week.map((d, i) => (
-          <span key={i}>{d.emotion ?? "—"} </span>
+          <span key={i}>
+            {d ? EMOTIONS[d.emotion]?.emoji : "—"}{" "}
+          </span>
         ))}
       </div>
 
