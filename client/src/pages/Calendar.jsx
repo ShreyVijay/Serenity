@@ -7,7 +7,11 @@ import { EMOTIONS } from "../utils/emotions";
 import { weeklyEmotionalDrift } from "../utils/weeklyDrift";
 import { dailyEmotionalDrift } from "../utils/dailyDrift";
 
-function Calendar({ sessionId }) {
+import { getSession } from "../utils/session";
+
+function Calendar() {
+  const sessionId = getSession();
+
   const [events, setEvents] = useState([]);
   const [selectedDate, setSelectedDate] = useState(null);
   const [dayEntries, setDayEntries] = useState([]);
@@ -16,6 +20,7 @@ function Calendar({ sessionId }) {
   const [showJournals, setShowJournals] = useState(false);
 
   useEffect(() => {
+      if (!sessionId) return;
     async function load() {
       const journals = await getJournalsAPI(sessionId);
       const checkins = await getCheckins(sessionId);

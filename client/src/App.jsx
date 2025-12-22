@@ -1,20 +1,19 @@
 import { Routes, Route, Navigate } from "react-router-dom";
-import { useSession } from "./context/SessionContext";
-
 import Welcome from "./pages/Welcome";
 import Landing from "./pages/Landing";
 import Journal from "./pages/Journal";
 import Calendar from "./pages/Calendar";
 import Checkin from "./pages/Checkin";
+import { getSession } from "./utils/session";
 
 function App() {
-  const { isInitialized } = useSession();
+  const sessionId = getSession();
 
   return (
     <Routes>
-      {!isInitialized && <Route path="*" element={<Welcome />} />}
+      {!sessionId && <Route path="*" element={<Welcome />} />}
 
-      {isInitialized && (
+      {sessionId && (
         <>
           <Route path="/" element={<Landing />} />
           <Route path="/journal" element={<Journal />} />

@@ -2,20 +2,17 @@ import { useState, useEffect } from "react";
 import { EMOTIONS } from "../utils/emotions";
 import { saveCheckin, getCheckins } from "../utils/checkinApi";
 import { last7Days } from "../utils/last7Days";
-import { useSession } from "../context/SessionContext";
+import { getSession } from "../utils/session";
 
 function todayLocal() {
   const d = new Date();
-  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(
-    2,
-    "0"
-  )}-${String(d.getDate()).padStart(2, "0")}`;
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(
+    d.getDate()
+  ).padStart(2, "0")}`;
 }
 
-
 export default function Checkin() {
-  const { sessionId } = useSession();
-  console.log("CHECKIN SESSION ID:", sessionId);
+  const sessionId = getSession(); // 🔑 FIX
 
   const [emotion, setEmotion] = useState(null);
   const [energy, setEnergy] = useState(3);
@@ -30,17 +27,8 @@ export default function Checkin() {
     if (!sessionId) return;
 
     const data = await getCheckins(sessionId);
-
-    console.log(
-      "RAW CHECKINS:",
-      data.map((c) => c.date)
-    );
-    console.log("LAST 7 DAYS:", last7Days());
-
     const byDate = {};
-    data.forEach((c) => {
-      byDate[c.date] = c;
-    });
+    data.forEach((c) => (byDate[c.date] = c));
 
     const days = last7Days().map((d) => byDate[d] || null);
     setWeek(days);
@@ -65,8 +53,7 @@ export default function Checkin() {
 
     setSaving(false);
     setSaved(true);
-
-    await loadWeek(); // refresh UI
+    await loadWeek();
   }
 
   return (
@@ -76,9 +63,7 @@ export default function Checkin() {
       <div>
         <p>This week:</p>
         {week.map((d, i) => (
-          <span key={i}>
-            {d ? EMOTIONS[d.emotion]?.emoji : "—"}{" "}
-          </span>
+          <span key={i}>{d ? EMOTIONS[d.emotion]?.emoji : "—"} </span>
         ))}
       </div>
 

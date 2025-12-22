@@ -1,51 +1,37 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useSession } from "../context/SessionContext";
+import { createSession } from "../utils/session";
 
 function Welcome() {
-  const { createSession } = useSession();
   const navigate = useNavigate();
-
-  const [culture, setCulture]  = useState("neutral");
-  const [language, setLanguage] = useState("en");
   const [consent, setConsent] = useState(false);
 
   function submit() {
     if (!consent) return;
-
-    createSession({ culture, language });
+    createSession();
     navigate("/landing");
   }
 
   return (
-    <div>
-      <h1>Welcome to Serenity</h1>
+    <div className="max-w-xl mx-auto p-6 space-y-6">
+      <h1 className="text-3xl font-semibold">Welcome to Serenity</h1>
 
-      <select value={culture} onChange={(e) => setCulture(e.target.value)}>
-        <option value="neutral">Neutral</option>
-        <option value="indian">Indian</option>
-        <option value="western">Western</option>
-        <option value="east-asian">East Asian</option>
-        <option value="middle-eastern">Middle Eastern</option>
-        <option value="latin">Latin</option>
-        <option value="african">African</option>
-      </select>
-
-      <select value={language} onChange={(e) => setLanguage(e.target.value)}>
-        <option value="en">English</option>
-        <option value="hi">Hindi</option>
-      </select>
-
-      <label>
+      <label className="flex gap-2 items-center">
         <input
           type="checkbox"
           checked={consent}
           onChange={() => setConsent(!consent)}
         />
-        I understand this is not a medical service
+        <span>I understand this is not a medical service</span>
       </label>
 
-      <button disabled={!consent} onClick={submit}>
+      <button
+        disabled={!consent}
+        onClick={submit}
+        className={`px-4 py-2 rounded text-white ${
+          consent ? "bg-slate-900" : "bg-slate-400"
+        }`}
+      >
         Continue
       </button>
     </div>

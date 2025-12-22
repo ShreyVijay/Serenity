@@ -1,10 +1,14 @@
 import { useState } from "react";
 import MoodSelector from "../components/MoodSelector";
 import { useNavigate } from "react-router-dom";
-import { useSession } from "../context/SessionContext";
+import { getSession } from "../utils/session";
 import { useText } from "../i18n/useText";
 
 function Journal() {
+  const sessionId = getSession();
+  const navigate = useNavigate();
+  const t = useText();
+
   const [text, setText] = useState("");
   const [emotion, setEmotion] = useState(null);
   const [reflection, setReflection] = useState("");
@@ -15,14 +19,10 @@ function Journal() {
   const [journalId, setJournalId] = useState(null);
   const [helpline, setHelpline] = useState(null);
 
-  const { session } = useSession();
-  const navigate = useNavigate();
-  const t = useText();
-
   const canReflect = text.trim().length >= 10 && emotion !== null;
 
   async function handleReflect() {
-    if (!canReflect || loading) return;
+    if (!canReflect || loading || !sessionId) return;
 
     setLoading(true);
     setReflection("");
@@ -37,23 +37,22 @@ function Journal() {
     const time = now.toTimeString().slice(0, 5);
 
     const entry = {
-  date,
-  time,
-  text,
-  emotion,
-  culture: session.culture,
-};
+      date,
+      time,
+      text,
+      emotion,
+      culture: "neutral", // culture will be moved later to Welcome
+    };
 
     try {
-      const res = await fetch("http://localhost:5000/journal", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-  sessionId: session.sessionId,
-  entry,
-})
-
-      });
+      const res = await fetch(
+        `${import.meta.env.VITE_API_BASE}/journal`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ sessionId, entry }),
+        }
+      );
 
       const data = await res.json();
 
@@ -76,7 +75,7 @@ function Journal() {
 
     try {
       const res = await fetch(
-        `http://localhost:5000/journal/${journalId}/followup`,
+        `${import.meta.env.VITE_API_BASE}/journal/${journalId}/followup`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -100,12 +99,12 @@ function Journal() {
         onClick={() => navigate("/checkin")}
         className="text-sm underline text-slate-600"
       >
-        Daily Check-In
+        {t.dailyCheckin}
       </button>
 
       <textarea
         className="w-full min-h-[160px] p-4 rounded border"
-        placeholder="Write anything that's on your mind..."
+        placeholder={t.journalPlaceholder}
         value={text}
         onChange={(e) => setText(e.target.value)}
       />
@@ -121,7 +120,7 @@ function Journal() {
             : "bg-slate-400 cursor-not-allowed"
         }`}
       >
-        {loading ? "Reflecting…" : "Reflect"}
+        {loading ? t.reflecting : t.reflect}
       </button>
 
       {reflection && (
@@ -130,16 +129,26 @@ function Journal() {
 
           {crisis && helpline && (
             <div className="border-t pt-3 text-sm text-slate-600">
-              <p>Support available in your area:</p>
+              <p>{t.supportAvailable}</p>
               <p className="font-medium">{helpline.name}</p>
               <p>📞 {helpline.phone}</p>
+              {helpline.website && (
+                <a
+                  href={helpline.website}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="underline"
+                >
+                  {helpline.website}
+                </a>
+              )}
             </div>
           )}
         </div>
       )}
 
       {reflection && journalId && !usedFollowUp && (
-        <button onClick={handleFollowUp}>One More Thought</button>
+        <button onClick={handleFollowUp}>{t.oneMoreThought}</button>
       )}
 
       {followUp && (
@@ -152,7 +161,7 @@ function Journal() {
         onClick={() => navigate("/calendar")}
         className="text-sm underline text-slate-600"
       >
-        View Mood Calendar
+        {t.viewCalendar}
       </button>
     </div>
   );
