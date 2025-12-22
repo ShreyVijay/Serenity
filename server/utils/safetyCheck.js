@@ -5,10 +5,11 @@ const dangerKeywords = [
   "end my life",
   "die",
   "worthless",
-  "hopeless"
+  "hopeless",
 ];
 
 export function hasDangerContent(text) {
+  if (!text) return false;
   const lower = text.toLowerCase();
   return dangerKeywords.some(word => lower.includes(word));
 }
