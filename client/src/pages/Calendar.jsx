@@ -86,6 +86,7 @@ function Calendar() {
     a.time.localeCompare(b.time)
   );
 
+  // Calculate daily drift text logic (same as desktop)
   const dailyDriftText = showJournals
     ? dailyEmotionalDrift(sortedEntries)
     : null;
@@ -162,6 +163,138 @@ function Calendar() {
     [&_.fc-event]:bg-transparent 
   `;
 
+  // --- REUSABLE CONTENT COMPONENT (To ensure Mobile & Desktop match exactly) ---
+  const DayDetailsContent = () => (
+    <div className="flex-1 overflow-y-auto custom-scrollbar min-h-0 pr-2 space-y-6">
+      {/* Check-in Card */}
+      {dayCheckin ? (
+        <div className="relative overflow-hidden bg-gradient-to-br from-white/80 to-slate-50/50 rounded-3xl p-6 border border-white shadow-sm">
+          <div className="flex items-center gap-5 mb-5 relative z-10">
+            <span className="text-5xl filter drop-shadow-sm">
+              {EMOTIONS[dayCheckin.emotion].emoji}
+            </span>
+            <div>
+              <p className="text-[10px] font-bold uppercase text-slate-400 tracking-wider">
+                {t.mood || "Mood"}
+              </p>
+              <p className="text-xl font-medium text-slate-700">
+                {EMOTIONS[dayCheckin.emotion].label}
+              </p>
+            </div>
+          </div>
+          {/* Energy & Clarity Grid - Now on Mobile too */}
+          <div className="grid grid-cols-2 gap-3 relative z-10">
+            <div className="bg-white/60 rounded-2xl p-3 text-center shadow-sm backdrop-blur-sm">
+              <Activity size={16} className="mx-auto text-emerald-400 mb-1" />
+              <span className="text-[10px] text-slate-400 uppercase tracking-wide block">
+                {t.energy || "Energy"}
+              </span>
+              <span className="text-lg font-semibold text-slate-600">
+                {dayCheckin.energy}
+              </span>
+            </div>
+            <div className="bg-white/60 rounded-2xl p-3 text-center shadow-sm backdrop-blur-sm">
+              <Sun size={16} className="mx-auto text-amber-400 mb-1" />
+              <span className="text-[10px] text-slate-400 uppercase tracking-wide block">
+                {t.clarity || "Mental Clarity"}
+              </span>
+              <span className="text-lg font-semibold text-slate-600">
+                {dayCheckin.openness}
+              </span>
+            </div>
+          </div>
+        </div>
+      ) : (
+        <div className="text-center py-10 text-slate-400 bg-white/30 rounded-3xl border border-dashed border-slate-200">
+          <Leaf className="w-8 h-8 mx-auto mb-3 opacity-20" />
+          <p className="text-xs font-medium">
+            {t.noCheckin || "No check-in recorded"}
+          </p>
+        </div>
+      )}
+
+      {/* Journals List */}
+      <div>
+        <div className="flex items-center justify-between mb-4 px-1">
+          <h4 className="text-xs font-bold uppercase text-slate-400 tracking-wider">
+            {t.journals || "Journals"}
+          </h4>
+          {!showJournals && sortedEntries.length > 0 && (
+            <button
+              onClick={() => setShowJournals(true)}
+              className="text-[10px] bg-white/60 px-3 py-1.5 rounded-full text-slate-500 border border-slate-200 hover:border-sky-200 hover:text-sky-600 transition-all shadow-sm"
+            >
+              {t.expand || "Expand"}
+            </button>
+          )}
+        </div>
+
+        {showJournals || sortedEntries.length <= 1 ? (
+          <div className="space-y-4">
+            {dailyDriftText && (
+              <div className="bg-sky-50/60 p-4 rounded-2xl text-xs text-sky-800 border border-sky-100 flex gap-3 leading-relaxed">
+                <Sparkles size={16} className="text-sky-500 shrink-0 mt-0.5" />
+                <span>{dailyDriftText}</span>
+              </div>
+            )}
+            {sortedEntries.map((entry, idx) => (
+              <div
+                key={idx}
+                className="bg-white p-5 rounded-3xl border border-slate-100 shadow-sm hover:shadow-md transition-shadow"
+              >
+                <div className="flex justify-between items-center mb-3">
+                  <span className="text-2xl">
+                    {EMOTIONS[entry.emotion].emoji}
+                  </span>
+                  <span className="text-[10px] bg-slate-50 px-2 py-1 rounded-full text-slate-400 font-medium tracking-wide">
+                    {entry.time}
+                  </span>
+                </div>
+                <p className="text-sm text-slate-600 font-light leading-relaxed mb-4">
+                  {entry.text}
+                </p>
+                {entry.reflection && (
+                  <div className="bg-emerald-50/40 p-3 rounded-2xl text-xs text-slate-500 italic flex gap-2 border border-emerald-50/50">
+                    <Leaf
+                      size={12}
+                      className="text-emerald-500 shrink-0 mt-0.5"
+                    />
+                    {entry.reflection}
+                  </div>
+                )}
+                {entry.followUp && (
+                  <div className="mt-3 ml-3 pl-2 border-l-2 border-indigo-200 text-xs text-indigo-700 italic flex gap-2">
+                    <Compass
+                      size={12}
+                      className="shrink-0 mt-0.5 text-indigo-400"
+                    />
+                    {entry.followUp}
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div
+            className="bg-white/40 p-5 rounded-3xl border border-transparent hover:border-slate-200 text-center cursor-pointer transition-all hover:bg-white/60"
+            onClick={() => setShowJournals(true)}
+          >
+            <span className="text-xs text-slate-500 font-medium">
+              {t.readEntriesPrefix || "Read"} {sortedEntries.length}{" "}
+              {t.readEntriesSuffix || "entries"}
+            </span>
+          </div>
+        )}
+
+        {sortedEntries.length === 0 && (
+          <div className="text-center py-6 text-slate-300 italic text-xs">
+            {t.noEntries || "A quiet day. No thoughts recorded."}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+
   return (
     <div className="h-screen w-full bg-gradient-to-b from-sky-100 via-emerald-50 to-slate-100 font-sans text-slate-800 flex flex-col overflow-hidden relative">
       {/* Ambient Background */}
@@ -179,7 +312,7 @@ function Calendar() {
             <ArrowLeft size={18} />
           </div>
           <span className="text-sm font-medium tracking-wide hidden md:block">
-            Back to Sanctuary
+            {t.backToSanctuary || "Back to Sanctuary"}
           </span>
         </Link>
 
@@ -237,7 +370,7 @@ function Calendar() {
             </div>
           </div>
 
-          {/* Side Panel */}
+          {/* Side Panel (Desktop) */}
           <div className="lg:col-span-4 h-full min-h-0 relative hidden lg:block">
             <AnimatePresence mode="wait">
               {selectedDate ? (
@@ -253,7 +386,7 @@ function Calendar() {
                   <div className="flex items-center justify-between mb-8 flex-none">
                     <div>
                       <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400">
-                        Overview
+                        {t.overview || "Overview"}
                       </span>
                       <h3 className="text-2xl font-light text-slate-800 mt-1">
                         {new Date(selectedDate).toLocaleDateString("en-US", {
@@ -270,142 +403,8 @@ function Calendar() {
                     </button>
                   </div>
 
-                  {/* Panel Content */}
-                  <div className="flex-1 overflow-y-auto custom-scrollbar min-h-0 pr-2 space-y-6">
-                    {/* Check-in */}
-                    {dayCheckin ? (
-                      <div className="relative overflow-hidden bg-gradient-to-br from-white/80 to-slate-50/50 rounded-3xl p-6 border border-white shadow-sm">
-                        <div className="flex items-center gap-5 mb-5 relative z-10">
-                          <span className="text-5xl filter drop-shadow-sm">
-                            {EMOTIONS[dayCheckin.emotion].emoji}
-                          </span>
-                          <div>
-                            <p className="text-[10px] font-bold uppercase text-slate-400 tracking-wider">
-                              Mood
-                            </p>
-                            <p className="text-xl font-medium text-slate-700">
-                              {EMOTIONS[dayCheckin.emotion].label}
-                            </p>
-                          </div>
-                        </div>
-                        <div className="grid grid-cols-2 gap-3 relative z-10">
-                          <div className="bg-white/60 rounded-2xl p-3 text-center shadow-sm backdrop-blur-sm">
-                            <Activity
-                              size={16}
-                              className="mx-auto text-emerald-400 mb-1"
-                            />
-                            <span className="text-[10px] text-slate-400 uppercase tracking-wide block">
-                              Energy
-                            </span>
-                            <span className="text-lg font-semibold text-slate-600">
-                              {dayCheckin.energy}
-                            </span>
-                          </div>
-                          <div className="bg-white/60 rounded-2xl p-3 text-center shadow-sm backdrop-blur-sm">
-                            <Sun
-                              size={16}
-                              className="mx-auto text-amber-400 mb-1"
-                            />
-                            <span className="text-[10px] text-slate-400 uppercase tracking-wide block">
-                              Mental Clarity
-                            </span>
-                            <span className="text-lg font-semibold text-slate-600">
-                              {dayCheckin.openness}
-                            </span>
-                          </div>
-                        </div>
-                      </div>
-                    ) : (
-                      <div className="text-center py-10 text-slate-400 bg-white/30 rounded-3xl border border-dashed border-slate-200">
-                        <Leaf className="w-8 h-8 mx-auto mb-3 opacity-20" />
-                        <p className="text-xs font-medium">
-                          No check-in recorded
-                        </p>
-                      </div>
-                    )}
-
-                    {/* Journals */}
-                    <div>
-                      <div className="flex items-center justify-between mb-4 px-1">
-                        <h4 className="text-xs font-bold uppercase text-slate-400 tracking-wider">
-                          Journals
-                        </h4>
-                        {!showJournals && sortedEntries.length > 0 && (
-                          <button
-                            onClick={() => setShowJournals(true)}
-                            className="text-[10px] bg-white/60 px-3 py-1.5 rounded-full text-slate-500 border border-slate-200 hover:border-sky-200 hover:text-sky-600 transition-all shadow-sm"
-                          >
-                            Expand
-                          </button>
-                        )}
-                      </div>
-
-                      {showJournals || sortedEntries.length <= 1 ? (
-                        <div className="space-y-4">
-                          {dailyDriftText && (
-                            <div className="bg-sky-50/60 p-4 rounded-2xl text-xs text-sky-800 border border-sky-100 flex gap-3 leading-relaxed">
-                              <Sparkles
-                                size={16}
-                                className="text-sky-500 shrink-0 mt-0.5"
-                              />
-                              <span>{dailyDriftText}</span>
-                            </div>
-                          )}
-                          {sortedEntries.map((entry, idx) => (
-                            <div
-                              key={idx}
-                              className="bg-white p-5 rounded-3xl border border-slate-100 shadow-sm hover:shadow-md transition-shadow"
-                            >
-                              <div className="flex justify-between items-center mb-3">
-                                <span className="text-2xl">
-                                  {EMOTIONS[entry.emotion].emoji}
-                                </span>
-                                <span className="text-[10px] bg-slate-50 px-2 py-1 rounded-full text-slate-400 font-medium tracking-wide">
-                                  {entry.time}
-                                </span>
-                              </div>
-                              <p className="text-sm text-slate-600 font-light leading-relaxed mb-4">
-                                {entry.text}
-                              </p>
-                              {entry.reflection && (
-                                <div className="bg-emerald-50/40 p-3 rounded-2xl text-xs text-slate-500 italic flex gap-2 border border-emerald-50/50">
-                                  <Leaf
-                                    size={12}
-                                    className="text-emerald-500 shrink-0 mt-0.5"
-                                  />
-                                  {entry.reflection}
-                                </div>
-                              )}
-                              {entry.followUp && (
-                                <div className="mt-3 ml-3 pl-2 border-l-2 border-indigo-200 text-xs text-indigo-700 italic flex gap-2">
-                                  <Compass
-                                    size={12}
-                                    className="shrink-0 mt-0.5 text-indigo-400"
-                                  />
-                                  {entry.followUp}
-                                </div>
-                              )}
-                            </div>
-                          ))}
-                        </div>
-                      ) : (
-                        <div
-                          className="bg-white/40 p-5 rounded-3xl border border-transparent hover:border-slate-200 text-center cursor-pointer transition-all hover:bg-white/60"
-                          onClick={() => setShowJournals(true)}
-                        >
-                          <span className="text-xs text-slate-500 font-medium">
-                            Read {sortedEntries.length} entries
-                          </span>
-                        </div>
-                      )}
-
-                      {sortedEntries.length === 0 && (
-                        <div className="text-center py-6 text-slate-300 italic text-xs">
-                          A quiet day. No thoughts recorded.
-                        </div>
-                      )}
-                    </div>
-                  </div>
+                  {/* Render Shared Content */}
+                  <DayDetailsContent />
                 </motion.div>
               ) : (
                 <div className="h-full flex flex-col items-center justify-center text-center p-8 bg-white/30 backdrop-blur-sm rounded-[2.5rem] border border-white/40">
@@ -413,10 +412,11 @@ function Calendar() {
                     <CalendarDays size={32} strokeWidth={1} />
                   </div>
                   <h3 className="text-lg font-medium text-slate-600 mb-2">
-                    Select a Date
+                    {t.selectDateTitle || "Select a Date"}
                   </h3>
                   <p className="text-sm text-slate-400 max-w-[200px]">
-                    Tap on any day to explore your emotional landscape.
+                    {t.selectDateDesc ||
+                      "Tap on any day to explore your emotional landscape."}
                   </p>
                 </div>
               )}
@@ -432,13 +432,13 @@ function Calendar() {
             initial={{ y: "100%" }}
             animate={{ y: 0 }}
             exit={{ y: "100%" }}
-            className="fixed inset-x-0 bottom-0 z-50 bg-white/90 backdrop-blur-xl rounded-t-[2.5rem] shadow-[0_-10px_40px_-10px_rgba(0,0,0,0.1)] p-6 lg:hidden h-[80vh] flex flex-col"
+            className="fixed inset-x-0 bottom-0 z-50 bg-white/90 backdrop-blur-xl rounded-t-[2.5rem] shadow-[0_-10px_40px_-10px_rgba(0,0,0,0.1)] p-6 lg:hidden h-[85vh] flex flex-col"
           >
             {/* Mobile Header */}
             <div className="flex items-center justify-between mb-6 flex-none">
               <div>
                 <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400">
-                  Overview
+                  {t.overview || "Overview"}
                 </span>
                 <h3 className="text-2xl font-light text-slate-800 mt-1">
                   {new Date(selectedDate).toLocaleDateString("en-US", {
@@ -455,75 +455,8 @@ function Calendar() {
               </button>
             </div>
 
-            {/* Mobile Content Reused Logic */}
-            <div className="flex-1 overflow-y-auto custom-scrollbar">
-              {/* Same content as Desktop Side Panel - Logic Replicated for Mobile */}
-              {/* (For brevity, you can refactor this inner content into a component called DayDetailsPanel) */}
-              {dayCheckin ? (
-                <div className="relative overflow-hidden bg-gradient-to-br from-white/80 to-slate-50/50 rounded-3xl p-6 border border-white shadow-sm mb-6">
-                  <div className="flex items-center gap-5 mb-5 relative z-10">
-                    <span className="text-5xl filter drop-shadow-sm">
-                      {EMOTIONS[dayCheckin.emotion].emoji}
-                    </span>
-                    <div>
-                      <p className="text-[10px] font-bold uppercase text-slate-400 tracking-wider">
-                        Mood
-                      </p>
-                      <p className="text-xl font-medium text-slate-700">
-                        {EMOTIONS[dayCheckin.emotion].label}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              ) : (
-                <div className="text-center py-10 text-slate-400 bg-white/30 rounded-3xl border border-dashed border-slate-200 mb-6">
-                  <p className="text-xs font-medium">No check-in</p>
-                </div>
-              )}
-
-              <div>
-                <div className="flex items-center justify-between mb-4 px-1">
-                  <h4 className="text-xs font-bold uppercase text-slate-400 tracking-wider">
-                    Journals
-                  </h4>
-                </div>
-                <div className="space-y-4">
-                  {sortedEntries.map((entry, idx) => (
-                    <div
-                      key={idx}
-                      className="bg-white p-5 rounded-3xl border border-slate-100 shadow-sm"
-                    >
-                      <p className="text-sm text-slate-600 font-light leading-relaxed mb-4">
-                        {entry.text}
-                      </p>
-                      {entry.reflection && (
-                        <div className="bg-emerald-50/40 p-3 rounded-2xl text-xs text-slate-500 italic flex gap-2 border border-emerald-50/50">
-                          <Leaf
-                            size={12}
-                            className="text-emerald-500 shrink-0 mt-0.5"
-                          />
-                          {entry.reflection}
-                        </div>
-                      )}
-                      {entry.followUp && (
-                        <div className="mt-3 ml-3 pl-2 border-l-2 border-indigo-200 text-xs text-indigo-700 italic flex gap-2">
-                          <Compass
-                            size={12}
-                            className="shrink-0 mt-0.5 text-indigo-400"
-                          />
-                          {entry.followUp}
-                        </div>
-                      )}
-                    </div>
-                  ))}
-                  {sortedEntries.length === 0 && (
-                    <p className="text-center text-xs text-slate-300">
-                      No entries
-                    </p>
-                  )}
-                </div>
-              </div>
-            </div>
+            {/* Render Shared Content (Now same as desktop) */}
+            <DayDetailsContent />
           </motion.div>
         )}
       </AnimatePresence>
