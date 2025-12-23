@@ -9,6 +9,9 @@ import {
   Loader2,
   BookOpen,
   Compass,
+  LifeBuoy, // Changed from AlertTriangle to LifeBuoy (Support)
+  Phone,
+  ExternalLink
 } from "lucide-react";
 import MoodSelector from "../components/MoodSelector";
 import { getOrCreateSessionId } from "../utils/session";
@@ -17,8 +20,12 @@ import { useText } from "../i18n/useText";
 function Journal() {
   const [text, setText] = useState("");
   const [emotion, setEmotion] = useState(null);
+  
+  // State
   const [reflection, setReflection] = useState("");
   const [loading, setLoading] = useState(false);
+  const [crisis, setCrisis] = useState(false);
+  const [helpline, setHelpline] = useState(null);
   const [followUp, setFollowUp] = useState(null);
   const [journalId, setJournalId] = useState(null);
 
@@ -33,11 +40,13 @@ function Journal() {
     setLoading(true);
     setReflection("");
     setFollowUp(null);
+    setCrisis(false);
+    setHelpline(null);
+    setJournalId(null);
 
     const sessionId = getOrCreateSessionId();
-
     const now = new Date();
-
+    // Local date calculation
     const localDate = new Date(now.getTime() - now.getTimezoneOffset() * 60000)
       .toISOString()
       .slice(0, 10);
@@ -63,9 +72,17 @@ function Journal() {
       if (!res.ok) throw new Error("Journal save failed");
 
       const data = await res.json();
-      setJournalId(data.journalId);
 
+      // Handle Journal ID if exists
+      if (data.journalId) {
+        setJournalId(data.journalId);
+      }
+      
+      // Handle Content
       setReflection(data.reflection || "");
+      setCrisis(!!data.crisis);
+      setHelpline(data.helpline);
+
     } catch (err) {
       console.error("Journal save error:", err);
     } finally {
@@ -143,7 +160,8 @@ function Journal() {
               {t.journalTitle || "Unload your mind"}
             </h2>
             <p className="text-slate-500 text-sm ml-10">
-              {t.journalSubtitle || "What is weighing on you right now? Let it out safely."}
+              {t.journalSubtitle ||
+                "What is weighing on you right now? Let it out safely."}
             </p>
           </div>
 
@@ -197,10 +215,64 @@ function Journal() {
           </div>
         </motion.div>
 
-        {/* RIGHT COLUMN: Reflection Output */}
+        {/* RIGHT COLUMN: Crisis Block OR Reflection Output */}
         <div className="h-full flex flex-col justify-center">
           <AnimatePresence mode="wait">
-            {reflection ? (
+            {crisis ? (
+              // --- CRISIS BLOCK (Exclusive View) ---
+              // Updated: Uses 'bg-indigo-50' and 'LifeBuoy' icon for a supportive, non-threatening vibe.
+              <motion.div
+                key="crisis"
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.95 }}
+                className="w-full bg-indigo-50/90 border border-indigo-100 rounded-[2.5rem] p-8 shadow-xl shadow-indigo-100/50"
+              >
+                <div className="flex items-center gap-3 mb-4 text-indigo-600">
+                    <LifeBuoy size={28} strokeWidth={2} />
+                    <h3 className="text-xl font-semibold tracking-tight">Here to support you</h3>
+                </div>
+                
+                {/* The safe message from backend */}
+                <p className="text-slate-700 leading-relaxed mb-8 text-lg font-medium">
+                  {reflection}
+                </p>
+
+                {helpline && (
+                  <div className="bg-white/60 backdrop-blur-sm rounded-2xl p-6 border border-white/60 shadow-sm space-y-4">
+                    <p className="text-xs font-bold uppercase tracking-widest text-slate-400">
+                        {t.supportAvailable || "Resources"}
+                    </p>
+                    
+                    <div className="space-y-1">
+                        <p className="text-slate-800 font-semibold text-lg leading-tight">
+                            {helpline.name}
+                        </p>
+                        <p className="text-slate-500 text-xs">
+                            Confidential • Free • 24/7
+                        </p>
+                    </div>
+
+                    <div className="flex flex-wrap gap-3 pt-2">
+                        {/* Phone Button - Supportive Blue instead of Danger Red */}
+                        <a href={`tel:${helpline.phone}`} className="flex-1 flex items-center justify-center gap-2 bg-indigo-600 text-white px-4 py-3 rounded-xl hover:bg-indigo-700 transition-colors shadow-lg shadow-indigo-200 cursor-pointer">
+                            <Phone size={18} />
+                            <span className="font-bold">{helpline.phone}</span>
+                        </a>
+
+                        {/* Website Button */}
+                        {helpline.website && (
+                            <a href={helpline.website} target="_blank" rel="noopener noreferrer" className="flex items-center justify-center gap-2 bg-white text-slate-600 border border-slate-200 px-4 py-3 rounded-xl hover:bg-slate-50 transition-colors cursor-pointer">
+                                <ExternalLink size={18} />
+                                <span className="font-medium">Website</span>
+                            </a>
+                        )}
+                    </div>
+                  </div>
+                )}
+              </motion.div>
+            ) : reflection ? (
+              // --- STANDARD REFLECTION BLOCK ---
               <motion.div
                 key="result"
                 initial={{ opacity: 0, x: 20, scale: 0.95 }}
@@ -263,11 +335,12 @@ function Journal() {
                 )}
               </motion.div>
             ) : (
-              /* Empty State Placeholder for Right Side */
+              // --- EMPTY STATE BLOCK ---
               <motion.div
                 key="placeholder"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
                 className="hidden lg:flex h-full flex-col items-center justify-center text-center p-12 opacity-40"
               >
                 <div className="w-64 h-64 bg-white/30 rounded-full blur-3xl absolute" />
@@ -281,7 +354,8 @@ function Journal() {
                     {t.readyToListen || "Ready to listen"}
                   </h3>
                   <p className="text-sm text-slate-300 mt-2 max-w-xs mx-auto">
-                    {t.reflectionPlaceholder || "Your reflection will appear here once you share your thoughts."}
+                    {t.reflectionPlaceholder ||
+                      "Your reflection will appear here once you share your thoughts."}
                   </p>
                 </div>
               </motion.div>
