@@ -1,8 +1,11 @@
 import { motion } from "framer-motion";
 import { Check } from "lucide-react";
 import { EMOTIONS } from "../utils/emotions";
+import { useText } from "../i18n/useText";
 
 function MoodSelector({ emotion, setEmotion }) {
+  const t = useText();
+
   return (
     <div className="flex flex-wrap gap-3">
       {Object.entries(EMOTIONS).map(([key, e]) => {
@@ -14,7 +17,6 @@ function MoodSelector({ emotion, setEmotion }) {
             onClick={() => setEmotion(key)}
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
-            // Added cursor-pointer here
             className={`
               cursor-pointer relative px-5 py-3 rounded-2xl flex items-center gap-3 transition-all duration-300
               ${isSelected 
@@ -32,9 +34,9 @@ function MoodSelector({ emotion, setEmotion }) {
                 {e.emoji}
             </span>
             
-            {/* Label */}
+            {/* Label - Updated to use translation if available, fallback to emotion object label */}
             <span className="text-sm tracking-wide select-none">
-                {e.label}
+                {t[key] || e.label}
             </span>
 
             {/* Selection Indicator */}

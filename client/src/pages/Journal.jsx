@@ -36,7 +36,7 @@ function Journal() {
 
     const sessionId = getOrCreateSessionId();
 
-    const now = new Date(); // ❗ THIS LINE WAS MISSING
+    const now = new Date();
 
     const localDate = new Date(now.getTime() - now.getTimezoneOffset() * 60000)
       .toISOString()
@@ -109,7 +109,7 @@ function Journal() {
             <ArrowLeft size={18} />
           </div>
           <span className="text-sm font-medium tracking-wide hidden md:block">
-            Back to Sanctuary
+            {t.backToSanctuary || "Back to Sanctuary"}
           </span>
         </Link>
 
@@ -117,7 +117,7 @@ function Journal() {
           <Link
             to="/calendar"
             className="w-10 h-10 rounded-full bg-white/60 hover:bg-white flex items-center justify-center text-slate-500 hover:text-amber-600 shadow-sm border border-white/50 backdrop-blur-md transition-all group"
-            title="View Calendar"
+            title={t.viewCalendar || "View Calendar"}
           >
             <CalendarDays size={18} />
           </Link>
@@ -143,7 +143,7 @@ function Journal() {
               {t.journalTitle || "Unload your mind"}
             </h2>
             <p className="text-slate-500 text-sm ml-10">
-              What is weighing on you right now? Let it out safely.
+              {t.journalSubtitle || "What is weighing on you right now? Let it out safely."}
             </p>
           </div>
 
@@ -158,7 +158,7 @@ function Journal() {
 
             <div className="mt-6 pt-6 border-t border-slate-100">
               <label className="text-xs font-bold uppercase tracking-widest text-slate-400 mb-4 block pl-1">
-                How does this make you feel?
+                {t.howDoYouFeel || "How does this make you feel?"}
               </label>
               <MoodSelector emotion={emotion} setEmotion={setEmotion} />
             </div>
@@ -252,7 +252,7 @@ function Journal() {
                       </div>
                       <div className="space-y-2">
                         <span className="text-xs font-bold uppercase tracking-widest text-slate-400">
-                          One More Thought
+                          {t.deepenReflection || "One More Thought"}
                         </span>
                         <p className="text-slate-600 font-light text-lg italic leading-relaxed">
                           "{followUp}"
@@ -278,11 +278,10 @@ function Journal() {
                     strokeWidth={1}
                   />
                   <h3 className="text-xl font-light text-slate-400">
-                    Ready to listen
+                    {t.readyToListen || "Ready to listen"}
                   </h3>
                   <p className="text-sm text-slate-300 mt-2 max-w-xs mx-auto">
-                    Your reflection will appear here once you share your
-                    thoughts.
+                    {t.reflectionPlaceholder || "Your reflection will appear here once you share your thoughts."}
                   </p>
                 </div>
               </motion.div>
