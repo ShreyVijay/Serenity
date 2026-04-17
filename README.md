@@ -7,7 +7,7 @@
 > **Track:** Digital Safe Spaces (Primary) | Tech for Empathy (Secondary)
 
 <div align="center">
-  <img src="Serenity_landing.png" alt="Serenity Landing Page" width="auto" />
+  <img src="Serenity_landing.png" alt="Serenity Landing Page" width="60%" />
 <div/>
 
 ---
