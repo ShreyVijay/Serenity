@@ -150,4 +150,3 @@ Distributed under the MIT License.
 
 > *"Your space. Your pace."*
 
-```
