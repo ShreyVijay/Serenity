@@ -8,7 +8,7 @@
 
 <div align="center">
   <img src="Serenity_landing.png" alt="Serenity Landing Page" width="auto" />
-<div/>
+</div>
 
 ---
 
