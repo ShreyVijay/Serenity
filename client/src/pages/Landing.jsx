@@ -179,7 +179,7 @@ function Landing() {
         </div>
 
         {/* Footer */}
-        <motion.p variants={cardVariants} className="mt-auto text-center text-xs text-slate-400 font-medium tracking-wide pb-8">
+        <motion.p variants={cardVariants} className="mt-auto text-center text-m text-slate-400 font-medium tracking-wide pb-8">
             {t.footer || "Your space. Your pace."}
         </motion.p>
       </motion.div>
