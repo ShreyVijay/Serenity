@@ -11,7 +11,7 @@ export async function callGroq(text, culture) {
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
-      model: ENV.GROQ_MODEL || "llama-3.1-70b-versatile",
+      model: ENV.GROQ_MODEL || "qwen/qwen3.8-27b",
       messages: [
         {
           role: "system",
@@ -30,7 +30,7 @@ export async function callGroq(text, culture) {
 
   if (!res.ok) {
     const err = await res.text();
-    throw new Error(`Groq failed: ${err}`);
+    throw new Error(`Groq fallback failed: ${err}`);
   }
 
   const json = await res.json();

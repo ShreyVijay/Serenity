@@ -1,4 +1,3 @@
-﻿
 # Serenity 🌿
 **Reflect without records. Heal without judgment.**
 
@@ -37,7 +36,7 @@ It is an anonymous, culturally-aware journaling web app that helps users feel he
 Serenity creates a sanctuary where anonymity is the default. By removing the need for accounts and storing data only via session IDs, we lower the barrier to entry for users who are afraid of stigma or surveillance.
 
 ### 2. Tech for Empathy (Secondary Track)
-We utilize **Google Gemini 1.5 Flash** not to act as a chatbot, but as a mirror. The AI is prompted specifically to reflect emotions and validate feelings, fostering self-compassion rather than dispensing generic medical advice.
+We use **Google Gemini 4 Argon** as the primary reflection model, with **Groq (Qwen 3.8 27B)** as a fallback if Gemini fails or takes longer than five seconds. The AI is prompted to reflect emotions and validate feelings rather than dispense generic medical advice.
 
 ### 🌍 Cultural & Psychological Impact
 *(Submission Requirement)*
@@ -53,7 +52,7 @@ We utilize **Google Gemini 1.5 Flash** not to act as a chatbot, but as a mirror.
 Write freely. Our interface is designed to reduce cognitive load—minimal distractions, calming gradients, and a focus on the words. **No personal identifiers are ever collected.**
 
 ### 2. Culturally-Aware AI Reflection
-Our Gemini-powered engine creates a single-turn reflection based on your text and selected cultural context. It avoids "bot-like" responses and focuses on emotional validation.
+Our Gemini-powered engine creates a single-turn reflection based on your text and selected cultural context. If Gemini fails or times out after five seconds, the same request is sent to Groq. It avoids "bot-like" responses and focuses on emotional validation.
 
 ### 3. Daily Pulse Check-in
 Mental health isn't just "Happy" or "Sad."
@@ -74,7 +73,7 @@ Safety is paramount in mental health tech.
 | **Frontend** | React (Vite), Tailwind CSS, Framer Motion, FullCalendar |
 | **Backend** | Node.js, Express.js |
 | **Database** | MongoDB Atlas (Mongoose) |
-| **AI Engine** | Google Gemini API (gemini-1.5-flash) |
+| **AI Engine** | Google Gemini API (gemini-4-argon), Groq fallback (qwen/qwen3.8-27b) |
 | **Safety** | Custom Regex & Keyword Filtering Middleware |
 
 ---
@@ -85,6 +84,7 @@ Safety is paramount in mental health tech.
 * Node.js (v16+)
 * MongoDB Atlas Connection String
 * Google Gemini API Key
+* Groq API Key (fallback)
 
 ### 1. Clone the Repository
 ```bash
@@ -118,7 +118,9 @@ npm run dev
 PORT=5000
 MONGO_URI=your_mongodb_connection_string
 GEMINI_API_KEY=your_gemini_api_key
-GEMINI_MODEL=gemini-1.5-flash
+GEMINI_MODEL=gemini-4-argon
+GROQ_API_KEY=your_groq_api_key
+GROQ_MODEL=qwen/qwen3.8-27b
 CORS_ORIGIN=http://localhost:5173
 
 ```
@@ -138,7 +140,7 @@ To preserve the integrity of our v1 prototype, we focused on core features. Here
 ## 🏁 Hackathon Compliance Checklist
 
 * ✅ **Timeframe Integrity:** This entire project was conceptualized and built during the PeerBridge hackathon dates (Nov 8 – Dec 22).
-* ✅ **AI Disclosure:** We utilize Google Gemini 1.5 Flash for generating reflections.
+* ✅ **AI Disclosure:** We use Gemini 4 Argon for reflections, with Groq Qwen 3.8 27B as a fallback.
 * ✅ **Safety:** No medical claims are made. Crisis resources are hard-coded.
 * ✅ **Accessibility:** The UI is designed with high contrast and readable typography.
 

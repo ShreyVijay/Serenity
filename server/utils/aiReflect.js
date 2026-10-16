@@ -1,18 +1,18 @@
 // server/utils/aiReflect.js
+import { callGemini } from "./callGemini.js";
 import { callGroq } from "./callGroq.js";
-import { callFallbackLLM } from "./fallbackLLM.js";
 import { ENV } from "../config/env.js";
 
 export async function generateReflection(text, culture) {
   try {
-    return await callGroq(text, culture);
+    return await callGemini(text, culture);
   } catch (err) {
-    console.error("Groq failed, using fallback:", err.message);
+    console.error("Gemini failed, using Groq fallback:", err.message);
 
     if (ENV.DISABLE_FALLBACK === "true") {
       throw err;
     }
 
-    return await callFallbackLLM(text, culture);
+    return await callGroq(text, culture);
   }
 }
